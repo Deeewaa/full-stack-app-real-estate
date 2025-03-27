@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Home, User, Mail, Phone, Building, Lock, KeyRound, LogIn } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -76,179 +77,242 @@ export default function Register() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-screen py-10">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your details to create your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl w-full flex flex-col md:flex-row shadow-xl rounded-xl overflow-hidden">
+        {/* Left side - Image and company info */}
+        <div className="bg-primary md:w-2/5 p-8 text-white flex flex-col justify-between hidden md:flex">
+          <div>
+            <div className="mb-6">
+              <Home size={36} className="text-white" />
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Realty Estate</h2>
+            <p className="opacity-90 mb-8">Your trusted partner in finding the perfect property across Zambia.</p>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold">Join Our Community</h3>
+              <p className="opacity-80 text-sm">Get access to exclusive property listings, neighborhood insights, and connect with professional agents.</p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <Building size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="font-medium">David Wantula Emert Makungu</p>
+                <p className="text-xs opacity-80">Principal Agent & Owner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right side - Registration form */}
+        <div className="bg-white md:w-3/5 p-6 sm:p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Create Your Account</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Join Zambia's premier real estate platform
+            </p>
+          </div>
+          
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Full Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                          <Input placeholder="Enter your full name" className="pl-10" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Username</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                          <Input placeholder="Choose a username" className="pl-10" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Choose a username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+260xxxxxxxxx" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                          <Input type="email" placeholder="you@example.com" className="pl-10" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Phone Number (Optional)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                          <Input placeholder="+260xxxxxxxxx" className="pl-10" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <FormField
                 control={form.control}
                 name="userType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Account Type</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
+                    <FormLabel className="text-gray-700">Account Type</FormLabel>
+                    <div className="relative">
+                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" size={16} />
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="pl-10">
+                            <SelectValue placeholder="Select your account type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Rent & Buy">Rent & Buy</SelectItem>
+                          <SelectItem value="Landlord & Sell">Landlord & Sell</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="relative my-4">
+                <Separator className="absolute inset-0 flex items-center" />
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">
+                    Security Information
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Password</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your account type" />
-                        </SelectTrigger>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                          <Input 
+                            type={showPassword ? "text" : "password"} 
+                            placeholder="Choose a password" 
+                            className="pl-10 pr-10"
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-full px-3"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </Button>
+                        </div>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Rent & Buy">Rent & Buy</SelectItem>
-                        <SelectItem value="Landlord & Sell">Landlord & Sell</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input 
-                          type={showPassword ? "text" : "password"} 
-                          placeholder="Choose a password" 
-                          {...field} 
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input 
-                          type={showConfirmPassword ? "text" : "password"} 
-                          placeholder="Confirm your password" 
-                          {...field} 
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Confirm Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                          <Input 
+                            type={showConfirmPassword ? "text" : "password"} 
+                            placeholder="Confirm your password" 
+                            className="pl-10 pr-10"
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-full px-3"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full py-6 mt-4 text-base font-medium transition-colors"
                 disabled={isRegistering}
               >
-                {isRegistering ? "Creating account..." : "Register"}
+                {isRegistering ? "Creating your account..." : "Create Account"}
               </Button>
+              
+              <div className="text-center text-sm text-gray-600 mt-6">
+                Already have an account?{" "}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto font-semibold" 
+                  onClick={() => navigate("/auth/login")}
+                >
+                  Sign in <LogIn size={14} className="ml-1" />
+                </Button>
+              </div>
             </form>
           </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="text-center text-sm">
-            Already have an account?{" "}
-            <Button 
-              variant="link" 
-              className="p-0 h-auto" 
-              onClick={() => navigate("/auth/login")}
-            >
-              Login
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
