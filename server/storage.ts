@@ -31,6 +31,7 @@ export interface IStorage {
     ownerId?: number;
   }): Promise<Property[]>;
   createProperty(property: InsertProperty): Promise<Property>;
+  updateProperty(id: number, propertyData: Partial<InsertProperty>): Promise<Property | undefined>;
   updatePropertyStatus(id: number, status: string): Promise<Property | undefined>;
   
   // Messages methods
@@ -230,6 +231,27 @@ export class MemStorage implements IStorage {
     
     this.properties.set(id, property);
     return property;
+  }
+  
+  async updateProperty(id: number, propertyData: Partial<InsertProperty>): Promise<Property | undefined> {
+    const property = this.properties.get(id);
+    if (!property) return undefined;
+    
+    const updatedProperty: Property = {
+      ...property,
+      ...propertyData,
+      // Ensure these fields remain non-null if they were updated to null/undefined
+      additionalImages: propertyData.additionalImages ?? property.additionalImages,
+      latitude: propertyData.latitude ?? property.latitude,
+      longitude: propertyData.longitude ?? property.longitude,
+      status: propertyData.status ?? property.status,
+      isFeatured: propertyData.isFeatured ?? property.isFeatured,
+      isNew: propertyData.isNew ?? property.isNew,
+      updatedAt: new Date()
+    };
+    
+    this.properties.set(id, updatedProperty);
+    return updatedProperty;
   }
   
   async updatePropertyStatus(id: number, status: string): Promise<Property | undefined> {

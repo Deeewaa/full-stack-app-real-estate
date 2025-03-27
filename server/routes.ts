@@ -374,6 +374,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update property full information
+  app.patch("/api/properties/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid property ID" });
+    }
+    
+    try {
+      // Get existing property to check permissions
+      const existingProperty = await storage.getProperty(id);
+      if (!existingProperty) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      // Check that the user updating the property is the owner
+      if (existingProperty.ownerId !== req.body.ownerId) {
+        return res.status(403).json({ message: "Only the property owner can update this property" });
+      }
+      
+      // Check that owner is still a "Landlord & Sell" user
+      const owner = await storage.getUser(req.body.ownerId);
+      if (!owner || owner.userType !== "Landlord & Sell") {
+        return res.status(403).json({ message: "Only users with 'Landlord & Sell' role can update properties" });
+      }
+      
+      // Update property with all fields from request body
+      const updatedProperty = await storage.updateProperty(id, req.body);
+      
+      if (!updatedProperty) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      res.json(updatedProperty);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update property" });
+    }
+  });
+  
   // Update property status endpoint
   app.patch("/api/properties/:id/status", async (req, res) => {
     const id = parseInt(req.params.id);
