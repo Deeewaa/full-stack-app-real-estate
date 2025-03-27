@@ -26,7 +26,7 @@ export default function HeroSection() {
           asChild
         >
           <Link href="#waitlist">
-            <a>Join the Waitlist</a>
+            Join the Waitlist
           </Link>
         </Button>
       </div>

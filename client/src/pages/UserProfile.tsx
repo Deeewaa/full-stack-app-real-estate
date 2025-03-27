@@ -10,11 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pencil } from "lucide-react";
+import ProfileEdit from "@/components/profile/ProfileEdit";
 
 export default function UserProfile() {
   const { id } = useParams();
   const userId = parseInt(id || "0");
   const [activeTab, setActiveTab] = useState("about");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const currentUserId = parseInt(localStorage.getItem("userId") || "0");
 
   // Fetch user data
   const {
@@ -145,13 +149,28 @@ export default function UserProfile() {
           </Card>
 
           {/* Contact section for non-owner view */}
-          {parseInt(localStorage.getItem("userId") || "0") !== userId && (
+          {currentUserId !== userId ? (
             <Card className="mt-4">
               <CardHeader>
                 <CardTitle className="text-lg">Contact {user.fullName?.split(" ")[0] || user.username}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button className="w-full">Send Message</Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Profile Options</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  className="w-full flex items-center justify-center"
+                  onClick={() => setIsEditingProfile(true)}
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -172,34 +191,51 @@ export default function UserProfile() {
 
             {/* About tab */}
             <TabsContent value="about" className="mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>About {user.fullName || user.username}</CardTitle>
-                  <CardDescription>User information and biography</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {user.bio ? (
+              {isEditingProfile && currentUserId === userId ? (
+                <ProfileEdit user={user} onCancel={() => setIsEditingProfile(false)} />
+              ) : (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <h3 className="font-medium mb-2">Bio</h3>
-                      <p className="text-muted-foreground">{user.bio}</p>
+                      <CardTitle>About {user.fullName || user.username}</CardTitle>
+                      <CardDescription>User information and biography</CardDescription>
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground italic">No bio available</p>
-                  )}
+                    {currentUserId === userId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => setIsEditingProfile(true)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit profile</span>
+                      </Button>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {user.bio ? (
+                      <div>
+                        <h3 className="font-medium mb-2">Bio</h3>
+                        <p className="text-muted-foreground">{user.bio}</p>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground italic">No bio available</p>
+                    )}
 
-                  <Separator />
+                    <Separator />
 
-                  <div>
-                    <h3 className="font-medium mb-2">Account Information</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-muted-foreground">Member since:</div>
-                      <div>{new Date(user.createdAt).toLocaleDateString()}</div>
-                      <div className="text-muted-foreground">Account type:</div>
-                      <div>{user.userType}</div>
+                    <div>
+                      <h3 className="font-medium mb-2">Account Information</h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="text-muted-foreground">Member since:</div>
+                        <div>{new Date(user.createdAt).toLocaleDateString()}</div>
+                        <div className="text-muted-foreground">Account type:</div>
+                        <div>{user.userType}</div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             {/* Properties tab - only for landlords */}
@@ -233,7 +269,7 @@ export default function UserProfile() {
                       <p className="text-muted-foreground italic">No properties listed yet</p>
                     )}
                   </CardContent>
-                  {parseInt(localStorage.getItem("userId") || "0") === userId && (
+                  {currentUserId === userId && (
                     <CardFooter>
                       <Button className="w-full">+ Add New Property</Button>
                     </CardFooter>

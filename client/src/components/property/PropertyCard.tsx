@@ -21,7 +21,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
       <Link href={`/properties/${property.id}`}>
-        <a className="block">
+        <div className="block">
           <div className="relative overflow-hidden h-64">
             <img
               src={property.imageUrl}
@@ -82,7 +82,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               View Details
             </Button>
           </div>
-        </a>
+        </div>
       </Link>
     </div>
   );

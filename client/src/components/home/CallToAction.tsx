@@ -17,7 +17,7 @@ export default function CallToAction() {
           asChild
         >
           <Link href="#waitlist">
-            <a>Join the Waitlist Today</a>
+            Join the Waitlist Today
           </Link>
         </Button>
       </div>

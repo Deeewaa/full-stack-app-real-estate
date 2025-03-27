@@ -1,0 +1,45 @@
+[vite] connecting...
+[vite] connected.
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of &lt;a&gt;.
+    at a
+    at a
+    at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=afa284fc:337:18
+    at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=afa284fc:52:11
+    at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=afa284fc:33:11
+    at _c (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/src/components/ui/button.tsx:47:11)
+    at div
+    at section
+    at HeroSection
+    at Home
+    at ProtectedRoute (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/src/components/auth/ProtectedRoute.tsx:21:42)
+    at Route (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=afa284fc:323:16)
+    at Switch (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=afa284fc:379:17)
+    at Router
+    at main
+    at div
+    at AuthProvider (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/src/contexts/AuthContext.tsx:22:32)
+    at QueryClientProvider (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=afa284fc:2805:3)
+    at App
+at a
+at a
+at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=afa284fc:337:18
+at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=afa284fc:52:11
+at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=afa284fc:33:11
+at _c (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/src/components/ui/button.tsx:47:11)
+at div
+at section
+at HeroSection
+at Home
+at ProtectedRoute (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/src/components/auth/ProtectedRoute.tsx:21:42)
+at Route (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=afa284fc:323:16)
+at Switch (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=afa284fc:379:17)
+at Router
+at main
+at div
+at AuthProvider (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/src/contexts/AuthContext.tsx:22:32)
+at QueryClientProvider (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=afa284fc:2805:3)
+at App
+at t.value (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://23e8bc79-4489-4da8-8b4d-7f9a93950a0a-00-2201xm2m86tdi.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
