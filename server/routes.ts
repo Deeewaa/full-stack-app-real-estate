@@ -1,7 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertWaitlistSchema, insertMessageSchema, insertUserSchema, insertPropertySchema } from "@shared/schema";
+import { 
+  insertWaitlistSchema, insertMessageSchema, insertUserSchema, insertPropertySchema,
+  insertNeighborhoodSchema, insertAmenityCategorySchema, insertAmenitySchema,
+  insertNeighborhoodAmenitySchema, insertPropertyNeighborhoodSchema
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -531,6 +535,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Failed to remove saved property" });
+    }
+  });
+
+  // Neighborhood API endpoints
+  
+  // Get all neighborhoods
+  app.get("/api/neighborhoods", async (req, res) => {
+    try {
+      const neighborhoods = await storage.getAllNeighborhoods();
+      res.json(neighborhoods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve neighborhoods" });
+    }
+  });
+  
+  // Get neighborhood by ID
+  app.get("/api/neighborhoods/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid neighborhood ID" });
+    }
+    
+    try {
+      const neighborhood = await storage.getNeighborhood(id);
+      
+      if (!neighborhood) {
+        return res.status(404).json({ message: "Neighborhood not found" });
+      }
+      
+      res.json(neighborhood);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve neighborhood" });
+    }
+  });
+  
+  // Get neighborhoods by city
+  app.get("/api/neighborhoods/city/:city", async (req, res) => {
+    const { city } = req.params;
+    
+    if (!city) {
+      return res.status(400).json({ message: "City name is required" });
+    }
+    
+    try {
+      const neighborhoods = await storage.getNeighborhoodsByCity(city);
+      res.json(neighborhoods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve neighborhoods" });
+    }
+  });
+  
+  // Get neighborhoods by property
+  app.get("/api/neighborhoods/property/:propertyId", async (req, res) => {
+    const propertyId = parseInt(req.params.propertyId);
+    
+    if (isNaN(propertyId)) {
+      return res.status(400).json({ message: "Invalid property ID" });
+    }
+    
+    try {
+      const neighborhoods = await storage.getNeighborhoodsByProperty(propertyId);
+      res.json(neighborhoods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve neighborhoods" });
+    }
+  });
+  
+  // Create a neighborhood
+  app.post("/api/neighborhoods", async (req, res) => {
+    try {
+      const neighborhoodData = insertNeighborhoodSchema.parse(req.body);
+      const neighborhood = await storage.createNeighborhood(neighborhoodData);
+      res.status(201).json(neighborhood);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid neighborhood data",
+          errors: error.errors
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to create neighborhood" });
+    }
+  });
+  
+  // Amenity API endpoints
+  
+  // Get all amenity categories
+  app.get("/api/amenity-categories", async (req, res) => {
+    try {
+      const categories = await storage.getAllAmenityCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve amenity categories" });
+    }
+  });
+  
+  // Get all amenities
+  app.get("/api/amenities", async (req, res) => {
+    try {
+      const amenities = await storage.getAllAmenities();
+      res.json(amenities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve amenities" });
+    }
+  });
+  
+  // Get amenities by category
+  app.get("/api/amenities/category/:categoryId", async (req, res) => {
+    const categoryId = parseInt(req.params.categoryId);
+    
+    if (isNaN(categoryId)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+    
+    try {
+      const amenities = await storage.getAmenitiesByCategory(categoryId);
+      res.json(amenities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve amenities" });
+    }
+  });
+  
+  // Get amenities by neighborhood
+  app.get("/api/amenities/neighborhood/:neighborhoodId", async (req, res) => {
+    const neighborhoodId = parseInt(req.params.neighborhoodId);
+    
+    if (isNaN(neighborhoodId)) {
+      return res.status(400).json({ message: "Invalid neighborhood ID" });
+    }
+    
+    try {
+      const amenities = await storage.getAmenitiesByNeighborhood(neighborhoodId);
+      res.json(amenities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve amenities" });
+    }
+  });
+  
+  // Get nearby amenities
+  app.get("/api/amenities/nearby", async (req, res) => {
+    const { latitude, longitude, radius } = req.query;
+    
+    // Validate parameters
+    if (!latitude || !longitude || !radius) {
+      return res.status(400).json({ message: "Latitude, longitude, and radius are required" });
+    }
+    
+    const lat = parseFloat(latitude as string);
+    const lng = parseFloat(longitude as string);
+    const rad = parseFloat(radius as string);
+    
+    if (isNaN(lat) || isNaN(lng) || isNaN(rad)) {
+      return res.status(400).json({ message: "Invalid latitude, longitude, or radius" });
+    }
+    
+    try {
+      const amenities = await storage.getNearbyAmenities(lat, lng, rad);
+      res.json(amenities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve nearby amenities" });
+    }
+  });
+  
+  // Create a relationship between property and neighborhood
+  app.post("/api/property-neighborhoods", async (req, res) => {
+    try {
+      const relationData = insertPropertyNeighborhoodSchema.parse(req.body);
+      
+      // Check that property exists
+      const property = await storage.getProperty(relationData.propertyId);
+      if (!property) {
+        return res.status(400).json({ message: "Invalid property ID" });
+      }
+      
+      // Check that neighborhood exists
+      const neighborhood = await storage.getNeighborhood(relationData.neighborhoodId);
+      if (!neighborhood) {
+        return res.status(400).json({ message: "Invalid neighborhood ID" });
+      }
+      
+      const relation = await storage.addPropertyToNeighborhood(relationData);
+      res.status(201).json(relation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid data",
+          errors: error.errors
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to create property-neighborhood relationship" });
     }
   });
 

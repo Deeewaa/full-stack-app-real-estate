@@ -184,3 +184,117 @@ export const insertSavedPropertySchema = createInsertSchema(savedProperties).omi
 
 export type InsertSavedProperty = z.infer<typeof insertSavedPropertySchema>;
 export type SavedProperty = typeof savedProperties.$inferSelect;
+
+// Neighborhood schema
+export const neighborhoods = pgTable("neighborhoods", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  city: text("city").notNull(),
+  description: text("description").notNull(),
+  safetyRating: integer("safety_rating").notNull(),
+  walkabilityScore: integer("walkability_score").notNull(),
+  schoolRating: integer("school_rating").notNull(),
+  imageUrl: text("image_url").notNull(),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+});
+
+export const insertNeighborhoodSchema = createInsertSchema(neighborhoods).omit({
+  id: true,
+});
+
+export type InsertNeighborhood = z.infer<typeof insertNeighborhoodSchema>;
+export type Neighborhood = typeof neighborhoods.$inferSelect;
+
+// Amenity categories
+export const amenityCategories = pgTable("amenity_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  icon: text("icon").notNull(),
+});
+
+export const insertAmenityCategorySchema = createInsertSchema(amenityCategories).omit({
+  id: true,
+});
+
+export type InsertAmenityCategory = z.infer<typeof insertAmenityCategorySchema>;
+export type AmenityCategory = typeof amenityCategories.$inferSelect;
+
+// Amenities schema
+export const amenities = pgTable("amenities", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  categoryId: integer("category_id").notNull(),
+  address: text("address").notNull(),
+  description: text("description").notNull().default(""),
+  imageUrl: text("image_url").notNull().default(""),
+  website: text("website").notNull().default(""),
+  phoneNumber: text("phone_number").notNull().default(""),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+}, (table) => {
+  return {
+    categoryFk: foreignKey({
+      columns: [table.categoryId],
+      foreignColumns: [amenityCategories.id],
+    }),
+  };
+});
+
+export const insertAmenitySchema = createInsertSchema(amenities).omit({
+  id: true,
+});
+
+export type InsertAmenity = z.infer<typeof insertAmenitySchema>;
+export type Amenity = typeof amenities.$inferSelect;
+
+// Neighborhood amenities relation (many-to-many)
+export const neighborhoodAmenities = pgTable("neighborhood_amenities", {
+  id: serial("id").primaryKey(),
+  neighborhoodId: integer("neighborhood_id").notNull(),
+  amenityId: integer("amenity_id").notNull(),
+  distance: doublePrecision("distance").notNull().default(0), // in kilometers
+}, (table) => {
+  return {
+    neighborhoodFk: foreignKey({
+      columns: [table.neighborhoodId],
+      foreignColumns: [neighborhoods.id],
+    }),
+    amenityFk: foreignKey({
+      columns: [table.amenityId],
+      foreignColumns: [amenities.id],
+    }),
+  };
+});
+
+export const insertNeighborhoodAmenitySchema = createInsertSchema(neighborhoodAmenities).omit({
+  id: true,
+});
+
+export type InsertNeighborhoodAmenity = z.infer<typeof insertNeighborhoodAmenitySchema>;
+export type NeighborhoodAmenity = typeof neighborhoodAmenities.$inferSelect;
+
+// Property neighborhood relation
+export const propertyNeighborhoods = pgTable("property_neighborhoods", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull(),
+  neighborhoodId: integer("neighborhood_id").notNull(),
+}, (table) => {
+  return {
+    propertyFk: foreignKey({
+      columns: [table.propertyId],
+      foreignColumns: [properties.id],
+    }),
+    neighborhoodFk: foreignKey({
+      columns: [table.neighborhoodId],
+      foreignColumns: [neighborhoods.id],
+    }),
+  };
+});
+
+export const insertPropertyNeighborhoodSchema = createInsertSchema(propertyNeighborhoods).omit({
+  id: true,
+});
+
+export type InsertPropertyNeighborhood = z.infer<typeof insertPropertyNeighborhoodSchema>;
+export type PropertyNeighborhood = typeof propertyNeighborhoods.$inferSelect;

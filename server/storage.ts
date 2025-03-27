@@ -5,7 +5,12 @@ import {
   testimonials, type Testimonial, type InsertTestimonial,
   waitlistEntries, type WaitlistEntry, type InsertWaitlistEntry,
   messages, type Message, type InsertMessage,
-  savedProperties, type SavedProperty, type InsertSavedProperty
+  savedProperties, type SavedProperty, type InsertSavedProperty,
+  neighborhoods, type Neighborhood, type InsertNeighborhood,
+  amenityCategories, type AmenityCategory, type InsertAmenityCategory,
+  amenities, type Amenity, type InsertAmenity,
+  neighborhoodAmenities, type NeighborhoodAmenity, type InsertNeighborhoodAmenity,
+  propertyNeighborhoods, type PropertyNeighborhood, type InsertPropertyNeighborhood
 } from "@shared/schema";
 
 export interface IStorage {
@@ -57,6 +62,36 @@ export interface IStorage {
   
   // Waitlist methods
   createWaitlistEntry(entry: InsertWaitlistEntry): Promise<WaitlistEntry>;
+  
+  // Neighborhood methods
+  getAllNeighborhoods(): Promise<Neighborhood[]>;
+  getNeighborhood(id: number): Promise<Neighborhood | undefined>;
+  getNeighborhoodsByCity(city: string): Promise<Neighborhood[]>;
+  createNeighborhood(neighborhood: InsertNeighborhood): Promise<Neighborhood>;
+  updateNeighborhood(id: number, data: Partial<InsertNeighborhood>): Promise<Neighborhood | undefined>;
+  
+  // Property Neighborhood methods
+  getNeighborhoodsByProperty(propertyId: number): Promise<Neighborhood[]>;
+  addPropertyToNeighborhood(propertyNeighborhood: InsertPropertyNeighborhood): Promise<PropertyNeighborhood>;
+  removePropertyFromNeighborhood(propertyId: number, neighborhoodId: number): Promise<boolean>;
+  
+  // Amenity Category methods
+  getAllAmenityCategories(): Promise<AmenityCategory[]>;
+  getAmenityCategory(id: number): Promise<AmenityCategory | undefined>;
+  createAmenityCategory(category: InsertAmenityCategory): Promise<AmenityCategory>;
+  
+  // Amenity methods
+  getAllAmenities(): Promise<Amenity[]>;
+  getAmenity(id: number): Promise<Amenity | undefined>;
+  getAmenitiesByCategory(categoryId: number): Promise<Amenity[]>;
+  createAmenity(amenity: InsertAmenity): Promise<Amenity>;
+  updateAmenity(id: number, data: Partial<InsertAmenity>): Promise<Amenity | undefined>;
+  
+  // Neighborhood Amenity methods
+  getAmenitiesByNeighborhood(neighborhoodId: number): Promise<(Amenity & { distance: number })[]>;
+  getNearbyAmenities(latitude: number, longitude: number, radius: number): Promise<Amenity[]>;
+  addAmenityToNeighborhood(neighborhoodAmenity: InsertNeighborhoodAmenity): Promise<NeighborhoodAmenity>;
+  removeAmenityFromNeighborhood(neighborhoodId: number, amenityId: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -67,6 +102,11 @@ export class MemStorage implements IStorage {
   private waitlistEntries: Map<number, WaitlistEntry>;
   private messages: Map<number, Message>;
   private savedProperties: Map<number, SavedProperty>;
+  private neighborhoods: Map<number, Neighborhood>;
+  private amenityCategories: Map<number, AmenityCategory>;
+  private amenities: Map<number, Amenity>;
+  private neighborhoodAmenities: Map<number, NeighborhoodAmenity>;
+  private propertyNeighborhoods: Map<number, PropertyNeighborhood>;
   
   private userId: number;
   private propertyId: number;
@@ -75,6 +115,11 @@ export class MemStorage implements IStorage {
   private waitlistId: number;
   private messageId: number;
   private savedPropertyId: number;
+  private neighborhoodId: number;
+  private amenityCategoryId: number;
+  private amenityId: number;
+  private neighborhoodAmenityId: number;
+  private propertyNeighborhoodId: number;
 
   constructor() {
     this.users = new Map();
@@ -84,6 +129,11 @@ export class MemStorage implements IStorage {
     this.waitlistEntries = new Map();
     this.messages = new Map();
     this.savedProperties = new Map();
+    this.neighborhoods = new Map();
+    this.amenityCategories = new Map();
+    this.amenities = new Map();
+    this.neighborhoodAmenities = new Map();
+    this.propertyNeighborhoods = new Map();
     
     this.userId = 1;
     this.propertyId = 1;
@@ -92,6 +142,11 @@ export class MemStorage implements IStorage {
     this.waitlistId = 1;
     this.messageId = 1;
     this.savedPropertyId = 1;
+    this.neighborhoodId = 1;
+    this.amenityCategoryId = 1;
+    this.amenityId = 1;
+    this.neighborhoodAmenityId = 1;
+    this.propertyNeighborhoodId = 1;
     
     // Initialize with sample data
     this.initializeSampleData();
@@ -387,6 +442,195 @@ export class MemStorage implements IStorage {
     const [id, _] = savedPropertyEntry;
     return this.savedProperties.delete(id);
   }
+  
+  // Neighborhood methods
+  async getAllNeighborhoods(): Promise<Neighborhood[]> {
+    return Array.from(this.neighborhoods.values());
+  }
+
+  async getNeighborhood(id: number): Promise<Neighborhood | undefined> {
+    return this.neighborhoods.get(id);
+  }
+
+  async getNeighborhoodsByCity(city: string): Promise<Neighborhood[]> {
+    return Array.from(this.neighborhoods.values()).filter(
+      (neighborhood) => neighborhood.city === city
+    );
+  }
+
+  async createNeighborhood(neighborhood: InsertNeighborhood): Promise<Neighborhood> {
+    const id = this.neighborhoodId++;
+    const newNeighborhood: Neighborhood = { 
+      ...neighborhood, 
+      id 
+    };
+    this.neighborhoods.set(id, newNeighborhood);
+    return newNeighborhood;
+  }
+
+  async updateNeighborhood(id: number, data: Partial<InsertNeighborhood>): Promise<Neighborhood | undefined> {
+    const neighborhood = this.neighborhoods.get(id);
+    if (!neighborhood) return undefined;
+    
+    const updatedNeighborhood: Neighborhood = {
+      ...neighborhood,
+      ...data
+    };
+    
+    this.neighborhoods.set(id, updatedNeighborhood);
+    return updatedNeighborhood;
+  }
+  
+  // Property Neighborhood methods
+  async getNeighborhoodsByProperty(propertyId: number): Promise<Neighborhood[]> {
+    const propertyNeighborhoodRelations = Array.from(this.propertyNeighborhoods.values())
+      .filter(relation => relation.propertyId === propertyId);
+    
+    return propertyNeighborhoodRelations.map(relation => 
+      this.neighborhoods.get(relation.neighborhoodId)
+    ).filter((neighborhood): neighborhood is Neighborhood => neighborhood !== undefined);
+  }
+
+  async addPropertyToNeighborhood(propertyNeighborhood: InsertPropertyNeighborhood): Promise<PropertyNeighborhood> {
+    const id = this.propertyNeighborhoodId++;
+    const newRelation: PropertyNeighborhood = { 
+      ...propertyNeighborhood, 
+      id 
+    };
+    this.propertyNeighborhoods.set(id, newRelation);
+    return newRelation;
+  }
+
+  async removePropertyFromNeighborhood(propertyId: number, neighborhoodId: number): Promise<boolean> {
+    const relation = Array.from(this.propertyNeighborhoods.entries()).find(
+      ([_, relation]) => relation.propertyId === propertyId && relation.neighborhoodId === neighborhoodId
+    );
+    
+    if (!relation) return false;
+    
+    const [id, _] = relation;
+    return this.propertyNeighborhoods.delete(id);
+  }
+  
+  // Amenity Category methods
+  async getAllAmenityCategories(): Promise<AmenityCategory[]> {
+    return Array.from(this.amenityCategories.values());
+  }
+
+  async getAmenityCategory(id: number): Promise<AmenityCategory | undefined> {
+    return this.amenityCategories.get(id);
+  }
+
+  async createAmenityCategory(category: InsertAmenityCategory): Promise<AmenityCategory> {
+    const id = this.amenityCategoryId++;
+    const newCategory: AmenityCategory = { 
+      ...category, 
+      id 
+    };
+    this.amenityCategories.set(id, newCategory);
+    return newCategory;
+  }
+  
+  // Amenity methods
+  async getAllAmenities(): Promise<Amenity[]> {
+    return Array.from(this.amenities.values());
+  }
+
+  async getAmenity(id: number): Promise<Amenity | undefined> {
+    return this.amenities.get(id);
+  }
+
+  async getAmenitiesByCategory(categoryId: number): Promise<Amenity[]> {
+    return Array.from(this.amenities.values()).filter(
+      (amenity) => amenity.categoryId === categoryId
+    );
+  }
+
+  async createAmenity(amenity: InsertAmenity): Promise<Amenity> {
+    const id = this.amenityId++;
+    const newAmenity: Amenity = { 
+      ...amenity, 
+      id,
+      description: amenity.description ?? null,
+      imageUrl: amenity.imageUrl ?? null,
+      phoneNumber: amenity.phoneNumber ?? null,
+      website: amenity.website ?? null
+    };
+    this.amenities.set(id, newAmenity);
+    return newAmenity;
+  }
+
+  async updateAmenity(id: number, data: Partial<InsertAmenity>): Promise<Amenity | undefined> {
+    const amenity = this.amenities.get(id);
+    if (!amenity) return undefined;
+    
+    const updatedAmenity: Amenity = {
+      ...amenity,
+      ...data
+    };
+    
+    this.amenities.set(id, updatedAmenity);
+    return updatedAmenity;
+  }
+  
+  // Neighborhood Amenity methods
+  async getAmenitiesByNeighborhood(neighborhoodId: number): Promise<(Amenity & { distance: number })[]> {
+    const relations = Array.from(this.neighborhoodAmenities.values())
+      .filter(relation => relation.neighborhoodId === neighborhoodId);
+    
+    return relations.map(relation => {
+      const amenity = this.amenities.get(relation.amenityId);
+      if (!amenity) return null;
+      
+      return {
+        ...amenity,
+        distance: relation.distance ?? 0
+      };
+    }).filter((amenity): amenity is (Amenity & { distance: number }) => amenity !== null);
+  }
+
+  async getNearbyAmenities(latitude: number, longitude: number, radius: number): Promise<Amenity[]> {
+    // This is a simplified implementation that doesn't actually calculate distances
+    // In a real application, you would calculate distance based on coordinates
+    return Array.from(this.amenities.values()).filter(amenity => {
+      if (!amenity.latitude || !amenity.longitude) return false;
+      
+      // Simple distance calculation using Euclidean distance (not accurate for real-world distances)
+      // A proper implementation would use the Haversine formula
+      const distance = Math.sqrt(
+        Math.pow(amenity.latitude - latitude, 2) + 
+        Math.pow(amenity.longitude - longitude, 2)
+      );
+      
+      // Convert to approximate kilometers (rough approximation)
+      // 0.01 degrees is approximately 1.11 km at the equator
+      const distanceInKm = distance * 111;
+      
+      return distanceInKm <= radius;
+    });
+  }
+
+  async addAmenityToNeighborhood(neighborhoodAmenity: InsertNeighborhoodAmenity): Promise<NeighborhoodAmenity> {
+    const id = this.neighborhoodAmenityId++;
+    const newRelation: NeighborhoodAmenity = { 
+      ...neighborhoodAmenity, 
+      id,
+      distance: neighborhoodAmenity.distance ?? 0
+    };
+    this.neighborhoodAmenities.set(id, newRelation);
+    return newRelation;
+  }
+
+  async removeAmenityFromNeighborhood(neighborhoodId: number, amenityId: number): Promise<boolean> {
+    const relation = Array.from(this.neighborhoodAmenities.entries()).find(
+      ([_, relation]) => relation.neighborhoodId === neighborhoodId && relation.amenityId === amenityId
+    );
+    
+    if (!relation) return false;
+    
+    const [id, _] = relation;
+    return this.neighborhoodAmenities.delete(id);
+  }
 
   // Initialize with sample data
   private initializeSampleData() {
@@ -602,6 +846,237 @@ export class MemStorage implements IStorage {
       });
     });
 
+    // Initialize neighborhoods
+    const sampleNeighborhoods: InsertNeighborhood[] = [
+      {
+        name: "Kabulonga",
+        city: "Lusaka",
+        description: "An upscale residential area with spacious homes, good schools, and diplomatic missions. Known for its quiet streets, international restaurants, and proximity to shopping centers.",
+        safetyRating: 9,
+        walkabilityScore: 6,
+        schoolRating: 8,
+        imageUrl: "https://images.unsplash.com/photo-1600585152220-90363fe7e115?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        latitude: -15.3911,
+        longitude: 28.2856
+      },
+      {
+        name: "Woodlands",
+        city: "Lusaka",
+        description: "A well-established residential area with a mix of older homes and new developments. Convenient access to Lusaka's central business district, with several local businesses and restaurants.",
+        safetyRating: 7,
+        walkabilityScore: 8,
+        schoolRating: 7,
+        imageUrl: "https://images.unsplash.com/photo-1602941525421-8f8b81d3edbb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        latitude: -15.4044,
+        longitude: 28.3196
+      },
+      {
+        name: "Ibex Hill",
+        city: "Lusaka",
+        description: "An exclusive suburb southeast of Lusaka with large properties and luxury homes. Features peaceful surroundings, wildlife sightings, and a secluded atmosphere while still being close to the city.",
+        safetyRating: 9,
+        walkabilityScore: 4,
+        schoolRating: 8,
+        imageUrl: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+        latitude: -15.4208,
+        longitude: 28.3933
+      },
+      {
+        name: "Roma Park",
+        city: "Lusaka",
+        description: "A modern mixed-use development with upscale homes, apartments, and a commercial center. Features planned infrastructure, a shopping mall, and recreational facilities.",
+        safetyRating: 8,
+        walkabilityScore: 9,
+        schoolRating: 8,
+        imageUrl: "https://images.unsplash.com/photo-1605146768851-eda79da33899?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        latitude: -15.3749,
+        longitude: 28.2976
+      },
+      {
+        name: "Livingstone Central",
+        city: "Livingstone",
+        description: "The heart of Livingstone city, offering a mix of colonial architecture, modern amenities, and proximity to Victoria Falls. Known for its vibrant atmosphere, tourist attractions, and cultural heritage.",
+        safetyRating: 7,
+        walkabilityScore: 9,
+        schoolRating: 7,
+        imageUrl: "https://images.unsplash.com/photo-1516498188851-408dbf70b610?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80",
+        latitude: -17.8516,
+        longitude: 25.8615
+      }
+    ];
+    
+    // Create neighborhoods
+    sampleNeighborhoods.forEach(neighborhood => {
+      const id = this.neighborhoodId++;
+      this.neighborhoods.set(id, { ...neighborhood, id });
+    });
+    
+    // Initialize amenity categories
+    const sampleAmenityCategories: InsertAmenityCategory[] = [
+      { name: "Education", icon: "school" },
+      { name: "Healthcare", icon: "stethoscope" },
+      { name: "Shopping", icon: "shopping-bag" },
+      { name: "Dining", icon: "utensils" },
+      { name: "Recreation", icon: "tree" },
+      { name: "Transportation", icon: "bus" },
+      { name: "Financial", icon: "credit-card" }
+    ];
+    
+    // Create amenity categories
+    const categoryMap = new Map<string, number>();
+    sampleAmenityCategories.forEach(category => {
+      const id = this.amenityCategoryId++;
+      this.amenityCategories.set(id, { ...category, id });
+      categoryMap.set(category.name, id);
+    });
+    
+    // Initialize amenities
+    const sampleAmenities: (InsertAmenity & { categoryName: string })[] = [
+      {
+        name: "International School of Lusaka",
+        categoryName: "Education",
+        address: "Plot 1320, Kasangula Road, Lusaka",
+        description: "Elite international school offering IB curriculum from primary to high school.",
+        imageUrl: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
+        website: "https://www.islschool.org",
+        phoneNumber: "+260 211 260715",
+        latitude: -15.3980,
+        longitude: 28.3136
+      },
+      {
+        name: "Lusaka Heart Hospital",
+        categoryName: "Healthcare",
+        address: "Plot 178, Great East Road, Lusaka",
+        description: "Specialized cardiac care center with modern facilities and experienced specialists.",
+        imageUrl: "https://images.unsplash.com/photo-1632833239869-a37e3a5806d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80",
+        website: "https://www.lusakahearthospital.co.zm",
+        phoneNumber: "+260 211 754321",
+        latitude: -15.4103,
+        longitude: 28.3262
+      },
+      {
+        name: "East Park Mall",
+        categoryName: "Shopping",
+        address: "Plot 17398, Thabo Mbeki Road, Lusaka",
+        description: "Modern shopping center with local and international retail stores, restaurants, and entertainment options.",
+        imageUrl: "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+        website: "https://www.eastparkmall.co.zm",
+        phoneNumber: "+260 211 123456",
+        latitude: -15.4115,
+        longitude: 28.3409
+      },
+      {
+        name: "Latitude 15",
+        categoryName: "Dining",
+        address: "Plot 810, Great East Road, Lusaka",
+        description: "Upscale boutique hotel with excellent restaurant serving international and local cuisine.",
+        imageUrl: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+        website: "https://www.latitude15.com",
+        phoneNumber: "+260 211 268802",
+        latitude: -15.3929,
+        longitude: 28.3497
+      },
+      {
+        name: "Lusaka Golf Club",
+        categoryName: "Recreation",
+        address: "Plot 7143, Leopards Hill Road, Lusaka",
+        description: "Historic 18-hole golf course with clubhouse facilities and restaurant.",
+        imageUrl: "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        website: "https://www.lusakagolfclub.com",
+        phoneNumber: "+260 211 278410",
+        latitude: -15.3996,
+        longitude: 28.3245
+      },
+      {
+        name: "Kenneth Kaunda International Airport",
+        categoryName: "Transportation",
+        address: "Great East Road, Lusaka",
+        description: "Lusaka's main international airport with domestic and international flight connections.",
+        imageUrl: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        website: "https://www.zacl.co.zm",
+        phoneNumber: "+260 211 271298",
+        latitude: -15.3307,
+        longitude: 28.4326
+      },
+      {
+        name: "Zanaco Bank - Manda Hill Branch",
+        categoryName: "Financial",
+        address: "Manda Hill Mall, Great East Road, Lusaka",
+        description: "Full-service banking center offering personal and business banking services.",
+        imageUrl: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        website: "https://www.zanaco.co.zm",
+        phoneNumber: "+260 211 254967",
+        latitude: -15.3985,
+        longitude: 28.3312
+      },
+      {
+        name: "Royal Livingstone Hotel",
+        categoryName: "Recreation",
+        address: "Mosi-oa-Tunya Road, Livingstone",
+        description: "Luxury 5-star hotel on the banks of the Zambezi River with views of Victoria Falls.",
+        imageUrl: "https://images.unsplash.com/photo-1455587734955-081b22074882?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
+        website: "https://www.anantara.com/en/royal-livingstone",
+        phoneNumber: "+260 213 321122",
+        latitude: -17.8555,
+        longitude: 25.8573
+      }
+    ];
+    
+    // Create amenities
+    sampleAmenities.forEach(amenityData => {
+      const id = this.amenityId++;
+      const categoryId = categoryMap.get(amenityData.categoryName) || 1;
+      const { categoryName, ...amenity } = amenityData;
+      
+      this.amenities.set(id, { 
+        id,
+        name: amenity.name,
+        description: amenity.description || "",
+        imageUrl: amenity.imageUrl || "",
+        phoneNumber: amenity.phoneNumber || "",
+        website: amenity.website || "",
+        latitude: amenity.latitude,
+        longitude: amenity.longitude,
+        address: amenity.address,
+        categoryId
+      });
+    });
+    
+    // Connect neighborhoods with amenities
+    // Kabulonga neighborhood (id: 1) with nearby amenities
+    this.addAmenityToNeighborhood({ neighborhoodId: 1, amenityId: 1, distance: 1.2 });
+    this.addAmenityToNeighborhood({ neighborhoodId: 1, amenityId: 5, distance: 1.5 });
+    
+    // Woodlands neighborhood (id: 2) with nearby amenities
+    this.addAmenityToNeighborhood({ neighborhoodId: 2, amenityId: 2, distance: 0.8 });
+    this.addAmenityToNeighborhood({ neighborhoodId: 2, amenityId: 7, distance: 1.0 });
+    
+    // Ibex Hill neighborhood (id: A3) with nearby amenities
+    this.addAmenityToNeighborhood({ neighborhoodId: 3, amenityId: 4, distance: 2.1 });
+    this.addAmenityToNeighborhood({ neighborhoodId: 3, amenityId: 6, distance: 4.5 });
+    
+    // Roma Park neighborhood (id: 4) with nearby amenities
+    this.addAmenityToNeighborhood({ neighborhoodId: 4, amenityId: 3, distance: 0.3 });
+    
+    // Livingstone Central neighborhood (id: 5) with nearby amenities
+    this.addAmenityToNeighborhood({ neighborhoodId: 5, amenityId: 8, distance: 1.8 });
+    
+    // Connect properties with neighborhoods
+    // Luxury Penthouse (id: 1) in Kabulonga (id: 1)
+    this.addPropertyToNeighborhood({ propertyId: 1, neighborhoodId: 1 });
+    
+    // Modern Villa (id: 2) in Ibex Hill (id: 3)
+    this.addPropertyToNeighborhood({ propertyId: 2, neighborhoodId: 3 });
+    
+    // Zambezi Riverfront Estate (id: 3) in Livingstone (id: 5)
+    this.addPropertyToNeighborhood({ propertyId: 3, neighborhoodId: 5 });
+    
+    // Contemporary Mansion (id: 4) in Kabulonga (id: 1)
+    this.addPropertyToNeighborhood({ propertyId: 4, neighborhoodId: 1 });
+    
+    // Luxury City Apartment (id: 5) in Woodlands (id: 2)
+    this.addPropertyToNeighborhood({ propertyId: 5, neighborhoodId: 2 });
+    
     // Sample testimonials
     const sampleTestimonials: InsertTestimonial[] = [
       {
