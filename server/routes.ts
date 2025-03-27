@@ -254,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // User login
+  // User login with /api/users/login endpoint (keep for backward compatibility)
   app.post("/api/users/login", async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -277,6 +277,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ message: "Failed to login" });
     }
+  });
+  
+  // Authentication endpoints
+  
+  // Login endpoint
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
+      // Find user by username
+      const user = await storage.getUserByUsername(username);
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      
+      // Don't send the password back in the response
+      const { password: _, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to login" });
+    }
+  });
+  
+  // Check authentication status
+  app.get("/api/auth/check", async (req, res) => {
+    // In a real app, this would check session or token
+    // We just return 401 since this is a mock endpoint for our client
+    res.status(401).json({ message: "Not authenticated" });
   });
   
   // Get user by ID

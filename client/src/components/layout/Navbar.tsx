@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,11 +11,21 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Menu, User, LogOut, Home, Building, UserPlus, Mail, Heart } from "lucide-react";
 
 export default function Navbar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -31,16 +42,37 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/properties", label: "Properties" },
-    { href: "/agents", label: "Agents" },
-    { href: "/contact", label: "Contact" },
+    { href: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
+    { href: "/properties", label: "Properties", icon: <Building className="h-4 w-4 mr-2" /> },
+    { href: "/agents", label: "Agents", icon: <UserPlus className="h-4 w-4 mr-2" /> },
+    { href: "/contact", label: "Contact", icon: <Mail className="h-4 w-4 mr-2" /> },
   ];
+
+  const handleLogout = () => {
+    logout();
+    setLocation("/auth/login");
+  };
+
+  // Generate user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return "?";
+    
+    if (user.fullName) {
+      return user.fullName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+    }
+    
+    return user.username.substring(0, 2).toUpperCase();
+  };
 
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white shadow-md" : "bg-transparent"
+        isScrolled || isAuthenticated ? "bg-white shadow-md" : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,11 +97,74 @@ export default function Navbar() {
                   </a>
                 </Link>
               ))}
+              
+              {/* Show "Add Property" link only for landlords */}
+              {isAuthenticated && user?.userType === "Landlord & Sell" && (
+                <Link href="/properties/new">
+                  <a
+                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-all ${
+                      location === "/properties/new"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-neutral-700 hover:text-secondary hover:border-secondary"
+                    }`}
+                  >
+                    Add Property
+                  </a>
+                </Link>
+              )}
             </div>
           </div>
 
           <div className="hidden sm:flex sm:items-center">
-            <Button>Sign In</Button>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar>
+                      <AvatarImage src={user?.profileImage || ""} alt={user?.username || ""} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>
+                    <div>
+                      <p className="font-medium">{user?.fullName || user?.username}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setLocation(`/profile/${user?.id}`)}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>My Profile</span>
+                  </DropdownMenuItem>
+                  {user?.userType === "Landlord & Sell" && (
+                    <DropdownMenuItem onSelect={() => setLocation("/properties/new")}>
+                      <Building className="mr-2 h-4 w-4" />
+                      <span>Add Property</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onSelect={() => setLocation(`/profile/${user?.id}`)}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    <span>Saved Properties</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="space-x-2">
+                <Button variant="outline" onClick={() => setLocation("/auth/register")}>
+                  Register
+                </Button>
+                <Button onClick={() => setLocation("/auth/login")}>
+                  Sign In
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center sm:hidden">
@@ -84,27 +179,103 @@ export default function Navbar() {
                   <SheetTitle className="font-display text-primary">Realty Estate</SheetTitle>
                   <SheetDescription>Find your dream property in Zambia</SheetDescription>
                 </SheetHeader>
-                <div className="flex flex-col space-y-3 mt-6">
+                
+                {isAuthenticated && (
+                  <div className="flex items-center space-x-2 py-4">
+                    <Avatar>
+                      <AvatarImage src={user?.profileImage || ""} alt={user?.username || ""} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{user?.fullName || user?.username}</p>
+                      <p className="text-xs text-muted-foreground">{user?.userType}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-col space-y-3 mt-2">
                   {navLinks.map((link) => (
                     <SheetClose key={link.href} asChild>
                       <Link href={link.href}>
                         <a
-                          className={`px-4 py-2 rounded-md text-base font-medium ${
+                          className={`flex items-center px-4 py-2 rounded-md text-base font-medium ${
                             location === link.href
-                              ? "bg-primary-light text-white"
+                              ? "bg-primary text-white"
                               : "text-neutral-700 hover:bg-neutral-100 hover:text-primary"
                           }`}
                         >
+                          {link.icon}
                           {link.label}
                         </a>
                       </Link>
                     </SheetClose>
                   ))}
-                  <div className="pt-4 border-t border-neutral-200 mt-4">
-                    <SheetClose asChild>
-                      <Button className="w-full">Sign In</Button>
-                    </SheetClose>
-                  </div>
+                  
+                  {isAuthenticated ? (
+                    <>
+                      <SheetClose asChild>
+                        <Link href={`/profile/${user?.id}`}>
+                          <a className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
+                            <User className="h-4 w-4 mr-2" />
+                            My Profile
+                          </a>
+                        </Link>
+                      </SheetClose>
+                      
+                      {user?.userType === "Landlord & Sell" && (
+                        <SheetClose asChild>
+                          <Link href="/properties/new">
+                            <a className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
+                              <Building className="h-4 w-4 mr-2" />
+                              Add Property
+                            </a>
+                          </Link>
+                        </SheetClose>
+                      )}
+                      
+                      <SheetClose asChild>
+                        <Link href={`/profile/${user?.id}`}>
+                          <a className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
+                            <Heart className="h-4 w-4 mr-2" />
+                            Saved Properties
+                          </a>
+                        </Link>
+                      </SheetClose>
+                      
+                      <div className="pt-4 border-t border-neutral-200 mt-4">
+                        <SheetClose asChild>
+                          <Button 
+                            variant="destructive" 
+                            className="w-full"
+                            onClick={handleLogout}
+                          >
+                            <LogOut className="h-4 w-4 mr-2" />
+                            Logout
+                          </Button>
+                        </SheetClose>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="pt-4 border-t border-neutral-200 mt-4 space-y-2">
+                      <SheetClose asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => setLocation("/auth/register")}
+                        >
+                          Register
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button 
+                          className="w-full"
+                          onClick={() => setLocation("/auth/login")}
+                        >
+                          Sign In
+                        </Button>
+                      </SheetClose>
+                    </div>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>

@@ -12,19 +12,90 @@ import PropertyForm from "@/pages/PropertyForm";
 import Agents from "@/pages/Agents";
 import Contact from "@/pages/Contact";
 import UserProfile from "@/pages/UserProfile";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/properties" component={PropertyListing} />
-      <Route path="/properties/:id" component={PropertyDetail} />
-      <Route path="/properties/new" component={PropertyForm} />
-      <Route path="/properties/edit/:id" component={PropertyForm} />
-      <Route path="/agents" component={Agents} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/profile/:id" component={UserProfile} />
-      <Route component={NotFound} />
+      {/* Public Routes */}
+      <Route path="/auth/login" component={Login} />
+      <Route path="/auth/register" component={Register} />
+      
+      {/* Protected Routes */}
+      <Route path="/">
+        {() => (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/properties">
+        {() => (
+          <ProtectedRoute>
+            <PropertyListing />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/properties/:id">
+        {(params) => (
+          <ProtectedRoute>
+            <PropertyDetail />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/properties/new">
+        {() => (
+          <ProtectedRoute>
+            <PropertyForm />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/properties/edit/:id">
+        {() => (
+          <ProtectedRoute>
+            <PropertyForm />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/agents">
+        {() => (
+          <ProtectedRoute>
+            <Agents />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/contact">
+        {() => (
+          <ProtectedRoute>
+            <Contact />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/profile/:id">
+        {() => (
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route>
+        {() => (
+          <ProtectedRoute>
+            <NotFound />
+          </ProtectedRoute>
+        )}
+      </Route>
     </Switch>
   );
 }
@@ -32,14 +103,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <Router />
-        </main>
-        <Footer />
-      </div>
-      <Toaster />
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-grow">
+            <Router />
+          </main>
+          <Footer />
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
