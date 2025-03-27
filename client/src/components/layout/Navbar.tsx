@@ -79,14 +79,14 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <Link href="/">
-              <a className="font-display text-2xl font-bold text-primary cursor-pointer">
+              <div className="font-display text-2xl font-bold text-primary cursor-pointer">
                 Realty Estate
-              </a>
+              </div>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
-                  <a
+                  <div
                     className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-all ${
                       location === link.href
                         ? "border-primary text-primary"
@@ -94,14 +94,14 @@ export default function Navbar() {
                     }`}
                   >
                     {link.label}
-                  </a>
+                  </div>
                 </Link>
               ))}
               
               {/* Show "Add Property" link only for landlords */}
               {isAuthenticated && user?.userType === "Landlord & Sell" && (
                 <Link href="/properties/new">
-                  <a
+                  <div
                     className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-all ${
                       location === "/properties/new"
                         ? "border-primary text-primary"
@@ -109,7 +109,7 @@ export default function Navbar() {
                     }`}
                   >
                     Add Property
-                  </a>
+                  </div>
                 </Link>
               )}
             </div>
@@ -197,7 +197,7 @@ export default function Navbar() {
                   {navLinks.map((link) => (
                     <SheetClose key={link.href} asChild>
                       <Link href={link.href}>
-                        <a
+                        <div
                           className={`flex items-center px-4 py-2 rounded-md text-base font-medium ${
                             location === link.href
                               ? "bg-primary text-white"
@@ -206,7 +206,7 @@ export default function Navbar() {
                         >
                           {link.icon}
                           {link.label}
-                        </a>
+                        </div>
                       </Link>
                     </SheetClose>
                   ))}
@@ -215,30 +215,30 @@ export default function Navbar() {
                     <>
                       <SheetClose asChild>
                         <Link href={`/profile/${user?.id}`}>
-                          <a className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
+                          <div className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
                             <User className="h-4 w-4 mr-2" />
                             My Profile
-                          </a>
+                          </div>
                         </Link>
                       </SheetClose>
                       
                       {user?.userType === "Landlord & Sell" && (
                         <SheetClose asChild>
                           <Link href="/properties/new">
-                            <a className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
+                            <div className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
                               <Building className="h-4 w-4 mr-2" />
                               Add Property
-                            </a>
+                            </div>
                           </Link>
                         </SheetClose>
                       )}
                       
                       <SheetClose asChild>
                         <Link href={`/profile/${user?.id}`}>
-                          <a className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
+                          <div className="flex items-center px-4 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100 hover:text-primary">
                             <Heart className="h-4 w-4 mr-2" />
                             Saved Properties
-                          </a>
+                          </div>
                         </Link>
                       </SheetClose>
                       

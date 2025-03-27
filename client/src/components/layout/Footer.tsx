@@ -54,22 +54,22 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link href="/">
-                  <a className="text-neutral-400 hover:text-white transition-all">Home</a>
+                  <div className="text-neutral-400 hover:text-white transition-all cursor-pointer">Home</div>
                 </Link>
               </li>
               <li>
                 <Link href="/properties">
-                  <a className="text-neutral-400 hover:text-white transition-all">Properties</a>
+                  <div className="text-neutral-400 hover:text-white transition-all cursor-pointer">Properties</div>
                 </Link>
               </li>
               <li>
                 <Link href="/agents">
-                  <a className="text-neutral-400 hover:text-white transition-all">Agents</a>
+                  <div className="text-neutral-400 hover:text-white transition-all cursor-pointer">Agents</div>
                 </Link>
               </li>
               <li>
                 <Link href="/contact">
-                  <a className="text-neutral-400 hover:text-white transition-all">Contact</a>
+                  <div className="text-neutral-400 hover:text-white transition-all cursor-pointer">Contact</div>
                 </Link>
               </li>
             </ul>
