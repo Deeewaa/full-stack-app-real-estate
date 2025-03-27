@@ -48,7 +48,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/">
               <a className="font-display text-2xl font-bold text-primary cursor-pointer">
-                EstateElite
+                Realty Estate
               </a>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -81,8 +81,8 @@ export default function Navbar() {
               </SheetTrigger>
               <SheetContent side="right">
                 <SheetHeader className="mb-4">
-                  <SheetTitle className="font-display text-primary">EstateElite</SheetTitle>
-                  <SheetDescription>Find your dream property</SheetDescription>
+                  <SheetTitle className="font-display text-primary">Realty Estate</SheetTitle>
+                  <SheetDescription>Find your dream property in Zambia</SheetDescription>
                 </SheetHeader>
                 <div className="flex flex-col space-y-3 mt-6">
                   {navLinks.map((link) => (

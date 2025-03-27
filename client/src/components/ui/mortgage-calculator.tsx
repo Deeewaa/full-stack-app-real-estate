@@ -37,7 +37,7 @@ export function MortgageCalculator({ propertyPrice }: MortgageCalculatorProps) {
       <div className="space-y-2">
         <div className="flex justify-between">
           <Label>Down Payment ({downPaymentPercentage.toFixed(0)}%)</Label>
-          <span className="text-sm font-medium">${downPayment.toLocaleString()}</span>
+          <span className="text-sm font-medium">ZMW {downPayment.toLocaleString()}</span>
         </div>
         <Slider
           value={[loanAmount]}
@@ -51,7 +51,7 @@ export function MortgageCalculator({ propertyPrice }: MortgageCalculatorProps) {
       <div className="space-y-2">
         <div className="flex justify-between">
           <Label>Loan Amount</Label>
-          <span className="text-sm font-medium">${loanAmount.toLocaleString()}</span>
+          <span className="text-sm font-medium">ZMW {loanAmount.toLocaleString()}</span>
         </div>
         <Input
           type="number"
@@ -99,7 +99,7 @@ export function MortgageCalculator({ propertyPrice }: MortgageCalculatorProps) {
           <div className="text-center">
             <h3 className="text-sm font-medium text-neutral-500 mb-1">Estimated Monthly Payment</h3>
             <p className="text-2xl font-bold text-primary">
-              ${monthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              ZMW {monthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
             <p className="text-xs text-neutral-500 mt-2">
               This is an estimate. Contact a mortgage specialist for accurate rates.

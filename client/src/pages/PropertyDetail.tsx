@@ -7,6 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Property } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,7 +29,7 @@ import {
 
 export default function PropertyDetail() {
   const { id } = useParams();
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading } = useQuery<Property>({
     queryKey: [`/api/properties/${id}`],
   });
 
@@ -226,7 +227,7 @@ export default function PropertyDetail() {
             <Card className="mb-6">
               <CardContent className="p-6">
                 <div className="text-2xl font-bold text-secondary mb-6">
-                  ${property.price.toLocaleString()}
+                  ZMW {property.price.toLocaleString()}
                 </div>
                 
                 <div className="space-y-4 mb-6">

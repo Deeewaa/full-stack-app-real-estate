@@ -61,7 +61,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-[#E0A458]">${property.price.toLocaleString()}</p>
+                <p className="text-lg font-bold text-[#E0A458]">ZMW {property.price.toLocaleString()}</p>
               </div>
             </div>
             <div className="flex justify-between text-neutral-600 mb-6">
