@@ -161,7 +161,7 @@ export default function Contact() {
           <div className="space-y-8">
             <div className="rounded-lg overflow-hidden h-[300px]">
               <MapComponent 
-                location={{ lat: 40.7128, lng: -74.0060 }} 
+                location={{ lat: -15.4167, lng: 28.2833 }} 
                 zoom={12} 
               />
             </div>
@@ -178,8 +178,8 @@ export default function Contact() {
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Office Address</h3>
                       <p className="text-neutral-700">
-                        1234 Luxury Lane, Suite 500<br />
-                        New York, NY 10001
+                        David Wantula Emert Makungu<br />
+                        Lusaka, Zambia
                       </p>
                     </div>
                   </div>
@@ -190,7 +190,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Phone Number</h3>
-                      <p className="text-neutral-700">+1 (800) 123-4567</p>
+                      <p className="text-neutral-700">+260 964 391774</p>
                       <p className="text-neutral-500 text-sm">Monday to Friday, 9am to 6pm</p>
                     </div>
                   </div>
@@ -201,7 +201,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Email Address</h3>
-                      <p className="text-neutral-700">info@estateelite.com</p>
+                      <p className="text-neutral-700">info@realtyestate.com</p>
                       <p className="text-neutral-500 text-sm">We respond within 24 hours</p>
                     </div>
                   </div>

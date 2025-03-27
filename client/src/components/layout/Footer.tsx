@@ -13,7 +13,9 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://facebook.com/david.wantula.emert.makungu"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-neutral-400 hover:text-white transition-all"
                 aria-label="Facebook"
               >
@@ -27,14 +29,18 @@ export default function Footer() {
                 <Twitter size={20} />
               </a>
               <a
-                href="#"
+                href="https://instagram.com/david_wantula_emert_makungu"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-neutral-400 hover:text-white transition-all"
                 aria-label="Instagram"
               >
                 <Instagram size={20} />
               </a>
               <a
-                href="#"
+                href="https://linkedin.com/in/david-wantula-emert-makungu"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-neutral-400 hover:text-white transition-all"
                 aria-label="LinkedIn"
               >
@@ -106,7 +112,7 @@ export default function Footer() {
               <li className="flex items-start">
                 <span className="mr-3 mt-1">📍</span>
                 <span>
-                  David Wantula Makungu
+                  David Wantula Emert Makungu
                   <br />
                   Lusaka, Zambia
                 </span>
@@ -124,7 +130,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-neutral-800 text-center text-neutral-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Realty Estate by David Wantula Makungu. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Realty Estate by David Wantula Emert Makungu. All rights reserved.</p>
         </div>
       </div>
     </footer>

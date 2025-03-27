@@ -297,12 +297,12 @@ export class MemStorage implements IStorage {
     // Sample agents
     const sampleAgents: InsertAgent[] = [
       {
-        name: "David Wantula Makungu",
+        name: "David Wantula Emert Makungu",
         title: "Principal Agent & Owner",
         bio: "With over 15 years of experience in Zambian real estate, specializing in luxury properties across major cities.",
         imageUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
-        instagram: "davidmakungu",
-        linkedin: "david-makungu",
+        instagram: "david_wantula_emert_makungu",
+        linkedin: "david-wantula-emert-makungu",
         email: "david@realtyestate.com"
       },
       {
