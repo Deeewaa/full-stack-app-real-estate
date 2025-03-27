@@ -92,6 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (userData: any) => {
     try {
       setIsLoading(true);
+      
+      // Make sure confirmPassword is included in the API request
+      if (!userData.confirmPassword && userData.password) {
+        userData.confirmPassword = userData.password;
+      }
+      
       const response = await apiRequest("POST", "/api/users/register", userData);
       
       if (!response.ok) {

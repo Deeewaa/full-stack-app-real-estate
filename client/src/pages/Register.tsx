@@ -54,9 +54,8 @@ export default function Register() {
   const onSubmit = async (values: RegisterFormValues) => {
     try {
       setIsRegistering(true);
-      // Remove confirmPassword as it's not needed for the API call
-      const { confirmPassword, ...userData } = values;
-      await register(userData);
+      // Send the full values including confirmPassword
+      await register(values);
       navigate("/");
     } catch (error: any) {
       console.error("Registration failed:", error);
