@@ -7,6 +7,7 @@ import {
   insertNeighborhoodAmenitySchema, insertPropertyNeighborhoodSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { checkDatabase, populateDatabase } from "./debug";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes with /api prefix
@@ -223,31 +224,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         path: ["confirmPassword"]
       });
       
+      console.log("Registration request body:", req.body);
+      
       const userData = registerSchema.parse(req.body);
+      console.log("Parsed user data:", userData);
       
       // Check if email already exists
       const existingUserByEmail = await storage.getUserByEmail(userData.email);
       if (existingUserByEmail) {
+        console.log("Email already exists:", userData.email);
         return res.status(400).json({ message: "Email is already in use" });
       }
       
       // Check if username already exists
       const existingUserByUsername = await storage.getUserByUsername(userData.username);
       if (existingUserByUsername) {
+        console.log("Username already exists:", userData.username);
         return res.status(400).json({ message: "Username is already taken" });
       }
       
       // Remove confirmPassword before creating user
       const { confirmPassword, ...userDataToSave } = userData;
+      console.log("Data to save:", userDataToSave);
       
-      const user = await storage.createUser(userDataToSave);
-      
-      // Don't send the password back in the response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(201).json(userWithoutPassword);
+      try {
+        const user = await storage.createUser(userDataToSave);
+        console.log("User created successfully:", user.id);
+        
+        // Don't send the password back in the response
+        const { password, ...userWithoutPassword } = user;
+        
+        res.status(201).json(userWithoutPassword);
+      } catch (dbError) {
+        console.error("Database error during user creation:", dbError);
+        return res.status(500).json({ message: "Failed to create user in database" });
+      }
     } catch (error) {
+      console.error("Registration error:", error);
       if (error instanceof z.ZodError) {
+        console.log("Validation errors:", error.errors);
         return res.status(400).json({ 
           message: "Invalid registration data",
           errors: error.errors
@@ -288,24 +303,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Login endpoint
   app.post("/api/auth/login", async (req, res) => {
     try {
+      console.log("Login request body:", req.body);
       const { username, password } = req.body;
       
       if (!username || !password) {
+        console.log("Missing username or password");
         return res.status(400).json({ message: "Username and password are required" });
       }
       
       // Find user by username
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid username or password" });
+      console.log("Attempting to find user with username:", username);
+      try {
+        const user = await storage.getUserByUsername(username);
+        
+        if (!user) {
+          console.log("User not found:", username);
+          return res.status(401).json({ message: "Invalid username or password" });
+        }
+        
+        console.log("User found, checking password");
+        if (user.password !== password) {
+          console.log("Password mismatch for user:", username);
+          return res.status(401).json({ message: "Invalid username or password" });
+        }
+        
+        console.log("Login successful for user:", username);
+        
+        // Don't send the password back in the response
+        const { password: _, ...userWithoutPassword } = user;
+        
+        res.json(userWithoutPassword);
+      } catch (dbError) {
+        console.error("Database error during login:", dbError);
+        return res.status(500).json({ message: "Database error during login" });
       }
-      
-      // Don't send the password back in the response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.json(userWithoutPassword);
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Failed to login" });
     }
   });
@@ -728,6 +761,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ message: "Failed to create property-neighborhood relationship" });
+    }
+  });
+
+  // Debug routes
+  app.get("/api/debug/db", async (req, res) => {
+    try {
+      const dbStatus = await checkDatabase();
+      res.json(dbStatus);
+    } catch (error: any) {
+      console.error("Error in /api/debug/db:", error);
+      res.status(500).json({ 
+        error: "Failed to check database",
+        message: error.message 
+      });
+    }
+  });
+
+  app.post("/api/debug/populate", async (req, res) => {
+    try {
+      const result = await populateDatabase();
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error in /api/debug/populate:", error);
+      res.status(500).json({ 
+        error: "Failed to populate database",
+        message: error.message 
+      });
     }
   });
 
