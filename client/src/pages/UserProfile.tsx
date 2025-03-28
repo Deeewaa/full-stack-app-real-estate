@@ -131,10 +131,23 @@ export default function UserProfile() {
         <div className="md:col-span-1">
           <Card>
             <CardContent className="pt-6 flex flex-col items-center">
-              <Avatar className="h-32 w-32 mb-4">
-                <AvatarImage src={user.profileImage || ""} alt={user.fullName || user.username} />
-                <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-32 w-32 mb-4">
+                  <AvatarImage src={user.profileImage || ""} alt={user.fullName || user.username} />
+                  <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
+                </Avatar>
+                {currentUserId === userId && (
+                  <Button 
+                    size="icon" 
+                    variant="secondary"
+                    className="absolute bottom-4 right-0 rounded-full h-8 w-8 shadow-md"
+                    onClick={() => setIsEditingProfile(true)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Edit profile picture</span>
+                  </Button>
+                )}
+              </div>
               <h2 className="text-2xl font-bold text-center mb-1">{user.fullName || user.username}</h2>
               <Badge variant="outline" className="mb-4">
                 {user.userType}
@@ -262,7 +275,7 @@ export default function UserProfile() {
                     ) : properties && properties.length > 0 ? (
                       <div className="grid grid-cols-1 gap-6">
                         {properties.map((property) => (
-                          <PropertyCard key={property.id} property={property} />
+                          <PropertyCard key={property.id} property={property} isProfileView={true} />
                         ))}
                       </div>
                     ) : (
@@ -301,7 +314,7 @@ export default function UserProfile() {
                   ) : savedProperties && savedProperties.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6">
                       {savedProperties.map((property) => (
-                        <PropertyCard key={property.id} property={property} />
+                        <PropertyCard key={property.id} property={property} isProfileView={true} />
                       ))}
                     </div>
                   ) : (

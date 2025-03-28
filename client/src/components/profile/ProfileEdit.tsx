@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Upload, Image, AlertCircle, Pencil } from "lucide-react";
 
 interface ProfileEditProps {
   user: User;
@@ -28,6 +30,9 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(user.profileImage || null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -41,6 +46,41 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
       profileImage: user.profileImage || "",
     },
   });
+  
+  // Handle image selection from file input
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setImageError(null);
+    
+    // Check file type
+    if (!file.type.match('image.*')) {
+      setImageError('Please select an image file');
+      return;
+    }
+    
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError('Image file size must be less than 5MB');
+      return;
+    }
+    
+    // Create a temporary URL for preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+      
+      // Update the form value with the image data URL
+      form.setValue('profileImage', event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  // Trigger file input click
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   const onSubmit = async (data: ProfileFormValues) => {
     setIsSubmitting(true);
@@ -147,12 +187,72 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
               name="profileImage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Profile Image URL</FormLabel>
+                  <FormLabel>Profile Picture</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/your-image.jpg" {...field} />
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center">
+                        <div className="relative">
+                          <Avatar className="h-24 w-24 border-2 border-muted">
+                            <AvatarImage src={imagePreview || ""} alt="Profile preview" />
+                            <AvatarFallback className="text-lg">
+                              {user.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <Button 
+                            type="button"
+                            size="icon" 
+                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full" 
+                            onClick={triggerFileInput}
+                          >
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Change image</span>
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={handleImageChange} 
+                      />
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full text-sm"
+                            onClick={triggerFileInput}
+                          >
+                            <Upload className="h-4 w-4 mr-2" />
+                            Upload Image
+                          </Button>
+                        </div>
+                        <div>
+                          <Input
+                            type="url"
+                            placeholder="Or enter image URL"
+                            value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                              setImagePreview(e.target.value);
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {imageError && (
+                        <div className="flex items-center text-destructive text-sm mt-2">
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          {imageError}
+                        </div>
+                      )}
+                    </div>
                   </FormControl>
                   <FormDescription>
-                    Enter a URL for your profile picture
+                    Upload a profile picture or provide an image URL
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
