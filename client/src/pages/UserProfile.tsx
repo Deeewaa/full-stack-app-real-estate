@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { User, Property } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
@@ -293,7 +293,9 @@ export default function UserProfile() {
                   </CardContent>
                   {currentUserId === userId && (
                     <CardFooter>
-                      <Button className="w-full">+ Add New Property</Button>
+                      <Link href="/properties/new">
+                        <Button className="w-full">+ Add New Property</Button>
+                      </Link>
                     </CardFooter>
                   )}
                 </Card>

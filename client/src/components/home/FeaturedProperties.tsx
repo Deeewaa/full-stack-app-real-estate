@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Property } from "@shared/schema";
 
 export default function FeaturedProperties() {
-  const { data: properties, isLoading } = useQuery({
+  const { data: properties = [], isLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties/featured/list"],
   });
 
