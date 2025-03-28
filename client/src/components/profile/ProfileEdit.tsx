@@ -60,9 +60,9 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
       return;
     }
     
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError('Image file size must be less than 5MB');
+    // Check file size (max 8MB to stay under our 10MB server limit)
+    if (file.size > 8 * 1024 * 1024) {
+      setImageError('Image file size must be less than 8MB');
       return;
     }
     
@@ -112,9 +112,22 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
       onCancel();
     } catch (error) {
       console.error("Error updating profile:", error);
+      
+      let errorMessage = "Failed to update profile";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      // Check for specific payload size error
+      if (errorMessage.toLowerCase().includes("too large") || 
+          errorMessage.toLowerCase().includes("payload") ||
+          errorMessage.toLowerCase().includes("entity")) {
+        errorMessage = "The image is too large. Please choose a smaller image (less than 8MB).";
+      }
+      
       toast({
         title: "Update failed",
-        description: error instanceof Error ? error.message : "Failed to update profile",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -252,7 +265,7 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Upload a profile picture or provide an image URL
+                    Upload a profile picture (max 8MB) or provide an image URL
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
