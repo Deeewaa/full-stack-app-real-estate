@@ -52,14 +52,13 @@ export default function FeaturedProperties() {
         </div>
 
         <div className="text-center mt-12">
-          <Button
-            asChild
-            className="px-8 py-3 bg-primary hover:bg-primary-light"
-          >
-            <Link href="/properties">
-              <a>Browse All Properties</a>
-            </Link>
-          </Button>
+          <Link href="/properties">
+            <Button
+              className="px-8 py-3 bg-primary hover:bg-primary-light text-white"
+            >
+              Browse All Properties
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
