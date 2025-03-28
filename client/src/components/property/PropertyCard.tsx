@@ -27,7 +27,7 @@ export default function PropertyCard({ property, isProfileView = false }: Proper
             <img
               src={property.imageUrl}
               alt={property.title}
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+              className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
             />
             {property.isFeatured && (
               <div className="absolute top-4 left-4">

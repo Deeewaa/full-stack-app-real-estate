@@ -131,16 +131,25 @@ export default function UserProfile() {
         <div className="md:col-span-1">
           <Card>
             <CardContent className="pt-6 flex flex-col items-center">
-              <div className="relative">
-                <Avatar className="h-32 w-32 mb-4">
-                  <AvatarImage src={user.profileImage || ""} alt={user.fullName || user.username} />
-                  <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
-                </Avatar>
+              <div className="relative mb-4">
+                <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-muted mx-auto">
+                  {user.profileImage ? (
+                    <img 
+                      src={user.profileImage} 
+                      alt={user.fullName || user.username} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted text-3xl font-bold">
+                      {userInitials}
+                    </div>
+                  )}
+                </div>
                 {currentUserId === userId && (
                   <Button 
                     size="icon" 
                     variant="secondary"
-                    className="absolute bottom-4 right-0 rounded-full h-8 w-8 shadow-md"
+                    className="absolute bottom-1 right-1/3 rounded-full h-9 w-9 shadow-md"
                     onClick={() => setIsEditingProfile(true)}
                   >
                     <Pencil className="h-4 w-4" />

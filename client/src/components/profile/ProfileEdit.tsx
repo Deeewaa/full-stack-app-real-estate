@@ -205,16 +205,26 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
                     <div className="space-y-4">
                       <div className="flex items-center justify-center">
                         <div className="relative">
-                          <Avatar className="h-24 w-24 border-2 border-muted">
-                            <AvatarImage src={imagePreview || ""} alt="Profile preview" />
-                            <AvatarFallback className="text-lg">
-                              {user.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div 
+                            className="w-32 h-32 rounded-full overflow-hidden border-2 border-muted cursor-pointer"
+                            onClick={triggerFileInput}
+                          >
+                            {imagePreview ? (
+                              <img 
+                                src={imagePreview} 
+                                alt="Profile preview" 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-muted text-2xl font-bold">
+                                {user.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
                           <Button 
                             type="button"
                             size="icon" 
-                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full" 
+                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md" 
                             onClick={triggerFileInput}
                           >
                             <Pencil className="h-4 w-4" />
