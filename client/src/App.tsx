@@ -41,14 +41,6 @@ function Router() {
         )}
       </Route>
       
-      <Route path="/properties/:id">
-        {(params) => (
-          <ProtectedRoute>
-            <PropertyDetail />
-          </ProtectedRoute>
-        )}
-      </Route>
-      
       <Route path="/properties/new">
         {() => (
           <ProtectedRoute>
@@ -61,6 +53,14 @@ function Router() {
         {() => (
           <ProtectedRoute>
             <PropertyForm />
+          </ProtectedRoute>
+        )}
+      </Route>
+      
+      <Route path="/properties/:id">
+        {(params) => (
+          <ProtectedRoute>
+            <PropertyDetail />
           </ProtectedRoute>
         )}
       </Route>
