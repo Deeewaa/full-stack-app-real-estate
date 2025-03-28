@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -8,6 +8,9 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { checkDatabase, populateDatabase } from "./debug";
+import { upload, getImageUrl } from "./upload";
+import * as path from "path";
+import * as fs from "fs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes with /api prefix
@@ -788,6 +791,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: "Failed to populate database",
         message: error.message 
       });
+    }
+  });
+
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    const filePath = path.join(process.cwd(), 'uploads', req.path);
+    // Check if file exists
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      next();
+    }
+  });
+
+  // File upload endpoints
+  
+  // Upload profile picture
+  app.post('/api/upload/profile', upload.single('profileImage'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      // Return the URL for the uploaded file
+      const imageUrl = getImageUrl(req.file.filename);
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error('Profile image upload error:', error);
+      res.status(500).json({ message: 'Failed to upload profile image' });
+    }
+  });
+  
+  // Upload property image
+  app.post('/api/upload/property', upload.single('propertyImage'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      // Return the URL for the uploaded file
+      const imageUrl = getImageUrl(req.file.filename);
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error('Property image upload error:', error);
+      res.status(500).json({ message: 'Failed to upload property image' });
+    }
+  });
+  
+  // Upload multiple property images
+  app.post('/api/upload/properties', upload.array('propertyImages', 5), (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+      }
+      
+      // Return the URLs for all uploaded files
+      const imageUrls = (req.files as Express.Multer.File[]).map(file => getImageUrl(file.filename));
+      res.json({ imageUrls });
+    } catch (error) {
+      console.error('Multiple property images upload error:', error);
+      res.status(500).json({ message: 'Failed to upload property images' });
     }
   });
 

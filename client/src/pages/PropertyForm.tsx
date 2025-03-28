@@ -26,7 +26,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Image, UploadCloud } from "lucide-react";
+import { Image } from "lucide-react";
+import MultiFileUploader from "@/components/upload/MultiFileUploader";
 
 // Form schema
 const propertyFormSchema = z.object({
@@ -36,7 +37,8 @@ const propertyFormSchema = z.object({
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State/Province is required"),
   price: z.coerce.number().positive("Price must be positive"),
-  imageUrl: z.string().url("Please provide a valid image URL"),
+  imageUrl: z.string().url("Please provide a valid main image URL"),
+  additionalImages: z.array(z.string().url()).optional(),
   squareFeet: z.coerce.number().positive("Area must be positive"),
   bedrooms: z.coerce.number().int().min(0, "Number of bedrooms must be positive"),
   bathrooms: z.coerce.number().min(0, "Number of bathrooms must be positive"),
@@ -56,6 +58,7 @@ const defaultValues: PropertyFormValues = {
   state: "",
   price: 0,
   imageUrl: "",
+  additionalImages: [],
   squareFeet: 0,
   bedrooms: 0,
   bathrooms: 0,
@@ -67,7 +70,6 @@ const defaultValues: PropertyFormValues = {
 
 export default function PropertyForm() {
   const [, navigate] = useLocation();
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -391,51 +393,54 @@ export default function PropertyForm() {
               <div className="space-y-4 pt-4">
                 <h3 className="text-lg font-medium">Property Images</h3>
                 
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Image URL</FormLabel>
-                      <FormControl>
-                        <div className="space-y-4">
-                          <Input
-                            placeholder="Enter image URL"
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              setImagePreview(e.target.value);
-                            }}
+                <div className="grid gap-6">
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Main Property Image</FormLabel>
+                        <FormControl>
+                          <FileUploader
+                            onImageUpload={(url) => field.onChange(url)}
+                            endpoint="/api/upload/property"
+                            fieldName="propertyImage"
+                            maxSizeMB={8}
+                            buttonText="Upload Main Image"
                           />
-                          
-                          {imagePreview ? (
-                            <div className="relative aspect-video rounded-md overflow-hidden border">
-                              <img
-                                src={imagePreview}
-                                alt="Property preview"
-                                className="w-full h-full object-cover"
-                                onError={() => setImagePreview(null)}
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center rounded-md border border-dashed p-8 text-center">
-                              <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-                                <Image className="h-10 w-10 text-muted-foreground" />
-                                <p className="mt-4 mb-2 text-sm text-muted-foreground">
-                                  Enter an image URL to preview how your property will appear
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Provide a URL to an image of your property
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        </FormControl>
+                        <FormDescription>
+                          This will be the primary image shown for your property
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="additionalImages"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Additional Images</FormLabel>
+                        <FormControl>
+                          <MultiFileUploader
+                            onImagesUpload={(urls) => field.onChange(urls)}
+                            endpoint="/api/upload/property"
+                            fieldName="propertyImage"
+                            maxFiles={4}
+                            maxSizeMB={8}
+                            buttonText="Upload Additional Images"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Upload up to 4 additional images of your property (max 8MB each)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </CardContent>
             

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Upload, Image, AlertCircle, Pencil } from "lucide-react";
+import FileUploader from "@/components/upload/FileUploader";
 
 interface ProfileEditProps {
   user: User;
@@ -23,7 +22,7 @@ const profileSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters").max(100),
   bio: z.string().optional(),
   phoneNumber: z.string().optional(),
-  profileImage: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  profileImage: z.string().optional().or(z.literal("")),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -31,8 +30,6 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(user.profileImage || null);
-  const [imageError, setImageError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -46,40 +43,11 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
       profileImage: user.profileImage || "",
     },
   });
-  
-  // Handle image selection from file input
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setImageError(null);
-    
-    // Check file type
-    if (!file.type.match('image.*')) {
-      setImageError('Please select an image file');
-      return;
-    }
-    
-    // Check file size (max 8MB to stay under our 10MB server limit)
-    if (file.size > 8 * 1024 * 1024) {
-      setImageError('Image file size must be less than 8MB');
-      return;
-    }
-    
-    // Create a temporary URL for preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setImagePreview(event.target?.result as string);
-      
-      // Update the form value with the image data URL
-      form.setValue('profileImage', event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-  
-  // Trigger file input click
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+
+  // Handle image upload
+  const handleImageUpload = (imageUrl: string) => {
+    form.setValue('profileImage', imageUrl);
+    setImagePreview(imageUrl);
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
@@ -116,13 +84,6 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
       let errorMessage = "Failed to update profile";
       if (error instanceof Error) {
         errorMessage = error.message;
-      }
-      
-      // Check for specific payload size error
-      if (errorMessage.toLowerCase().includes("too large") || 
-          errorMessage.toLowerCase().includes("payload") ||
-          errorMessage.toLowerCase().includes("entity")) {
-        errorMessage = "The image is too large. Please choose a smaller image (less than 8MB).";
       }
       
       toast({
@@ -203,79 +164,35 @@ export default function ProfileEdit({ user, onCancel }: ProfileEditProps) {
                   <FormLabel>Profile Picture</FormLabel>
                   <FormControl>
                     <div className="space-y-4">
+                      {/* Profile Picture Preview */}
                       <div className="flex items-center justify-center">
-                        <div className="relative">
-                          <div 
-                            className="w-32 h-32 rounded-full overflow-hidden border-2 border-muted cursor-pointer"
-                            onClick={triggerFileInput}
-                          >
-                            {imagePreview ? (
-                              <img 
-                                src={imagePreview} 
-                                alt="Profile preview" 
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-muted text-2xl font-bold">
-                                {user.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
-                              </div>
-                            )}
-                          </div>
-                          <Button 
-                            type="button"
-                            size="icon" 
-                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md" 
-                            onClick={triggerFileInput}
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Change image</span>
-                          </Button>
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-muted">
+                          {imagePreview ? (
+                            <img 
+                              src={imagePreview} 
+                              alt="Profile preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted text-2xl font-bold">
+                              {user.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || user.username?.slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
                         </div>
                       </div>
                       
-                      <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        className="hidden" 
-                        accept="image/*" 
-                        onChange={handleImageChange} 
+                      {/* File Uploader */}
+                      <FileUploader 
+                        onImageUpload={handleImageUpload}
+                        endpoint="/api/upload/profile"
+                        fieldName="profileImage"
+                        buttonText="Upload Profile Picture"
+                        maxSizeMB={8}
                       />
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full text-sm"
-                            onClick={triggerFileInput}
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Upload Image
-                          </Button>
-                        </div>
-                        <div>
-                          <Input
-                            type="url"
-                            placeholder="Or enter image URL"
-                            value={field.value || ""}
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                              setImagePreview(e.target.value);
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {imageError && (
-                        <div className="flex items-center text-destructive text-sm mt-2">
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          {imageError}
-                        </div>
-                      )}
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Upload a profile picture (max 8MB) or provide an image URL
+                    Upload a profile picture (max 8MB)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
