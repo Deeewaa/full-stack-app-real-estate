@@ -1,5 +1,5 @@
 import { db } from './db';
-import { users } from '../shared/schema';
+import { users } from '../../shared/schema';
 import { sql } from 'drizzle-orm';
 
 // Function to check if tables exist and are empty

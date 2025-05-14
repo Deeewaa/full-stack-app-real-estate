@@ -14,7 +14,7 @@ import {
   Amenity, InsertAmenity, amenities,
   NeighborhoodAmenity, InsertNeighborhoodAmenity, neighborhoodAmenities,
   PropertyNeighborhood, InsertPropertyNeighborhood, propertyNeighborhoods
-} from '../shared/schema';
+} from '../../shared/schema';
 
 // Calculate distance between two points using Haversine formula
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {

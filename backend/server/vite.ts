@@ -6,7 +6,7 @@ import { createServer as createViteServer, createLogger } from "vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 import { type Server } from "http";
-import viteConfig from "../vite.config";
+import viteConfig from "../../vite.config";
 import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
@@ -29,9 +29,13 @@ export async function setupVite(app: Express, server: Server) {
     allowedHosts: true,
   };
 
+  // REMOVE this line: Vite will serve static assets from your client's public directory
+  // const staticAssetsPath = path.resolve(__dirname, "..", "..", "dist", "public");
+  // app.use(express.static(staticAssetsPath));
+
   const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
+    ...viteConfig, // This should point to your main vite.config.ts
+    configFile: false, // Assuming viteConfig is already loaded
     customLogger: {
       ...viteLogger,
       error: (msg, options) => {
@@ -43,20 +47,27 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
-  app.use(vite.middlewares);
+  app.use(vite.middlewares); // Vite's middleware should handle static assets and HMR
+
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
     try {
+      // Point to your SOURCE index.html.
+      // Assuming your client source is in 'WaitlistWizard/WaitlistWizard/client/index.html'
+      // And your main vite.config.ts has `root: 'client'` or similar.
       const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html",
+        __dirname, // current: backend/server
+        "..",      // up to: backend
+        "..",      // up to: WaitlistWizard/WaitlistWizard (project root)
+        "client",  // into: client
+        "index.html" // the source index.html
       );
 
-      // always reload the index.html file from disk incase it changes
+      // always reload the source index.html file from disk
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      
+      // This replacement makes sense if your source index.html contains src="/src/main.tsx"
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
@@ -70,8 +81,15 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+// serveStatic function remains unchanged as it's for production builds
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
+  const distPath = path.resolve(
+    __dirname,
+    "..", // Go up one level from 'server' to 'backend'
+    "..", // Go up one level from 'backend' to 'WaitlistWizard/WaitlistWizard' (project root)
+    "dist",
+    "public",
+  );
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
