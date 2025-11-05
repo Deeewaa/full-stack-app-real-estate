@@ -1,13 +1,12 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { 
+import {
   insertWaitlistSchema, insertMessageSchema, insertUserSchema, insertPropertySchema,
   insertNeighborhoodSchema, insertAmenityCategorySchema, insertAmenitySchema,
   insertNeighborhoodAmenitySchema, insertPropertyNeighborhoodSchema
 } from "@shared/schema";
 import { z } from "zod";
-import { checkDatabase, populateDatabase } from "./debug";
 import { upload, getImageUrl } from "./upload";
 import * as path from "path";
 import * as fs from "fs";
@@ -764,33 +763,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ message: "Failed to create property-neighborhood relationship" });
-    }
-  });
-
-  // Debug routes
-  app.get("/api/debug/db", async (req, res) => {
-    try {
-      const dbStatus = await checkDatabase();
-      res.json(dbStatus);
-    } catch (error: any) {
-      console.error("Error in /api/debug/db:", error);
-      res.status(500).json({ 
-        error: "Failed to check database",
-        message: error.message 
-      });
-    }
-  });
-
-  app.post("/api/debug/populate", async (req, res) => {
-    try {
-      const result = await populateDatabase();
-      res.json(result);
-    } catch (error: any) {
-      console.error("Error in /api/debug/populate:", error);
-      res.status(500).json({ 
-        error: "Failed to populate database",
-        message: error.message 
-      });
     }
   });
 
